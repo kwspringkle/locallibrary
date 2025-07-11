@@ -1,0 +1,8 @@
+.env
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+# If you're using Django migrations:
+*/migrations/__pycache__/
+*/__pycache__/
