@@ -6,3 +6,5 @@ __pycache__/
 # If you're using Django migrations:
 */migrations/__pycache__/
 */__pycache__/
+
+.venv/
