@@ -8,3 +8,5 @@ __pycache__/
 */__pycache__/
 
 .venv/
+.pycodestyle
+check_pep8.ps1

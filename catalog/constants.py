@@ -13,4 +13,3 @@ class LOAN_STATUS(Enum):
     ON_LOAN = "o"
     AVAILABLE = "a"
     RESERVED = "r"
-
