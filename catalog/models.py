@@ -52,8 +52,11 @@ class Book(models.Model):
 
 
 class BookInstance(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, help_text=gettext(
-        "Unique ID for this particular book across whole library"), )
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        help_text=gettext("Unique ID for this particular book across whole library"),
+    )
     book = models.ForeignKey("Book", on_delete=models.RESTRICT)
     imprint = models.CharField(max_length=MAX_LENGTH_IMPRINT)
     due_back = models.DateField(null=True, blank=True)
@@ -61,10 +64,8 @@ class BookInstance(models.Model):
     status = models.CharField(
         max_length=MAX_LENGTH_STATUS,
         choices=[
-            (tag.value,
-             tag.name.replace(
-                 '_',
-                 ' ').title()) for tag in LOAN_STATUS],
+            (tag.value, tag.name.replace("_", " ").title()) for tag in LOAN_STATUS
+        ],
         default=LOAN_STATUS.MAINTENANCE.value,
         blank=True,
         help_text=gettext("Book availability"),
