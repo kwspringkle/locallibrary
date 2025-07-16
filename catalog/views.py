@@ -15,16 +15,15 @@ def index(request):
         status__exact=LOAN_STATUS.AVAILABLE.value
     ).count()
     num_authors = Author.objects.count()
-    num_visits = request.session.get('num_visits', NUM_VISITS)
-    request.session['num_visits'] = num_visits + NUM_VISITS
-
+    num_visits = request.session.get("num_visits", NUM_VISITS)
+    request.session["num_visits"] = num_visits + NUM_VISITS
 
     context = {
         "num_books": num_books,
         "num_instances": num_instances,
         "num_instance_available": num_instances_available,
         "num_authors": num_authors,
-        'num_visits': num_visits
+        "num_visits": num_visits,
     }
     return render(request, "index.html", context=context)
 
@@ -54,4 +53,3 @@ class BookDetailView(generic.DetailView):
         book = get_object_or_404(Book, pk=primary_key)
 
         return render(request, "catalog/book_detail.html", context={"book": book})
-
