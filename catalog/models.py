@@ -1,6 +1,8 @@
 import uuid
+from datetime import date
 from django.db import models
 from django.urls import reverse
+from django.contrib.auth.models import User
 from django.utils.translation import gettext
 from .constants import (
     MAX_LENGTH_IMPRINT,
@@ -60,12 +62,14 @@ class BookInstance(models.Model):
     id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
-        help_text=gettext("Unique ID for this particular book across whole library"),
+        help_text=gettext(
+            "Unique ID for this particular book across whole library"),
     )
     book = models.ForeignKey("Book", on_delete=models.RESTRICT)
     imprint = models.CharField(max_length=MAX_LENGTH_IMPRINT)
     due_back = models.DateField(null=True, blank=True)
-
+    borrower = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True)
     status = models.CharField(
         max_length=MAX_LENGTH_STATUS,
         choices=[
@@ -78,9 +82,14 @@ class BookInstance(models.Model):
 
     class Meta:
         ordering = ["due_back"]
+        permissions = (("can_mark_returned", "Set book as returned"),)
 
     def __str__(self):
         return f"{self.id} ({self.book.title})"
+
+    @property
+    def is_overdue(self):
+        return self.due_back and date.today() > self.due_back
 
 
 class Author(models.Model):
