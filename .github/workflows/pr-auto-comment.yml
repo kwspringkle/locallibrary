@@ -1,29 +1,38 @@
-name: Comment on Pull Request
+name: Auto Update PR Description
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, synchronize]
 
 jobs:
-  comment:
+  update-pr-description:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Read comment content
-        id: read_comment
+      - name: Read PR description content
+        id: read_description
         run: |
-          $content = Get-Content .github\pr-comment.md -Raw
-          $content = $content -replace "`r", ""  # loại bỏ CRLF nếu có
-          Add-Content -Path $env:GITHUB_OUTPUT -Value "content<<EOF"
-          Add-Content -Path $env:GITHUB_OUTPUT -Value "$content"
-          Add-Content -Path $env:GITHUB_OUTPUT -Value "EOF"
+          $content = Get-Content ".github\pr-comment.md" -Raw
+          $content | Out-File -FilePath description.txt -Encoding utf8NoBOM
+          echo "DESCRIPTION_CONTENT<<EOF" >> $env:GITHUB_ENV
+          Get-Content description.txt | ForEach-Object { echo $_ >> $env:GITHUB_ENV }
+          echo "EOF" >> $env:GITHUB_ENV
 
-      - name: Create PR comment
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          token: ${{ secrets.MY_PAT }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: ${{ steps.read_comment.outputs.content }}
+      - name: Update PR body
+        run: |
+          $headers = @{
+            Authorization = "Bearer ${{ secrets.MY_PAT }}"
+            Accept = "application/vnd.github+json"
+          }
+
+          $bodyContent = Get-Content "description.txt" -Raw
+          $jsonBody = @{ body = $bodyContent } | ConvertTo-Json -Compress
+
+          $prNumber = "${{ github.event.pull_request.number }}"
+          $repo = "${{ github.repository }}"
+          $url = "https://api.github.com/repos/$repo/pulls/$prNumber"
+
+          Invoke-RestMethod -Uri $url -Method Patch -Headers $headers -Body $jsonBody
